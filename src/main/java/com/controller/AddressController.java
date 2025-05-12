@@ -2,21 +2,16 @@
 package com.controller;
 
 import java.io.File;
-import java.math.BigDecimal;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import com.alibaba.fastjson.JSONObject;
 import java.util.*;
 import org.springframework.beans.BeanUtils;
 import javax.servlet.http.HttpServletRequest;
-import org.springframework.web.context.ContextLoader;
-import javax.servlet.ServletContext;
 import com.service.TokenService;
 import com.utils.*;
-import java.lang.reflect.InvocationTargetException;
 
 import com.service.DictionaryService;
-import org.apache.commons.lang3.StringUtils;
 import com.annotation.IgnoreAuth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +25,6 @@ import com.entity.view.*;
 import com.service.*;
 import com.utils.PageUtils;
 import com.utils.R;
-import com.alibaba.fastjson.*;
 
 /**
  * 收货地址
@@ -47,9 +41,9 @@ public class AddressController {
     @Autowired
     private AddressService addressService;
 
-
     @Autowired
     private TokenService tokenService;
+
     @Autowired
     private DictionaryService dictionaryService;
 
@@ -67,7 +61,7 @@ public class AddressController {
         logger.debug("page方法:,,Controller:{},,params:{}", this.getClass().getName(), JSONObject.toJSONString(params));
         String role = String.valueOf(request.getSession().getAttribute("role"));
         if(false)
-        { return R.error(511,"永不会进入");}
+        { return R.error(511,"Access is forbidden, please contact the system administrator!");}
         else if("用户".equals(role))
         {params.put("yonghuId",request.getSession().getAttribute("userId"));}
         if(params.get("orderBy")==null || params.get("orderBy")==""){

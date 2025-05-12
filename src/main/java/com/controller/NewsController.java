@@ -67,7 +67,7 @@ public class NewsController {
         logger.debug("page方法:,,Controller:{},,params:{}",this.getClass().getName(),JSONObject.toJSONString(params));
         String role = String.valueOf(request.getSession().getAttribute("role"));
         if(false)
-            return R.error(511,"永不会进入");
+            return R.error(511,"Access is forbidden, please contact the system administrator!");
         else if("用户".equals(role))
             params.put("yonghuId",request.getSession().getAttribute("userId"));
         if(params.get("orderBy")==null || params.get("orderBy")==""){
