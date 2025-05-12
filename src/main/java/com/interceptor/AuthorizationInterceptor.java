@@ -18,7 +18,7 @@ import com.annotation.IgnoreAuth;
 import com.entity.EIException;
 import com.entity.TokenEntity;
 import com.service.TokenService;
-import com.utils.R;
+import com.utils.Response;
 
 /**
  * 权限(Token)验证
@@ -82,7 +82,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 		response.setContentType("application/json; charset=utf-8");
 		try {
 		    writer = response.getWriter();
-		    writer.print(JSONObject.toJSONString(R.error(401, "请先登录")));
+		    writer.print(JSONObject.toJSONString(Response.error(401, "请先登录")));
 		} finally {
 		    if(writer != null){
 		        writer.close();

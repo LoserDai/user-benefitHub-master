@@ -18,7 +18,7 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.entity.ConfigEntity;
 import com.service.ConfigService;
 import com.utils.PageUtils;
-import com.utils.R;
+import com.utils.Response;
 import com.utils.ValidatorUtils;
 
 /**
@@ -35,10 +35,10 @@ public class ConfigController{
      * 列表
      */
     @RequestMapping("/page")
-    public R page(@RequestParam Map<String, Object> params,ConfigEntity config){
+    public Response page(@RequestParam Map<String, Object> params,ConfigEntity config){
         EntityWrapper<ConfigEntity> ew = new EntityWrapper<ConfigEntity>();
     	PageUtils page = configService.queryPage(params);
-        return R.ok().put("data", page);
+        return Response.ok().put("data", page);
     }
     
 	/**
@@ -46,19 +46,19 @@ public class ConfigController{
      */
     @IgnoreAuth
     @RequestMapping("/list")
-    public R list(@RequestParam Map<String, Object> params,ConfigEntity config){
+    public Response list(@RequestParam Map<String, Object> params,ConfigEntity config){
         EntityWrapper<ConfigEntity> ew = new EntityWrapper<ConfigEntity>();
     	PageUtils page = configService.queryPage(params);
-        return R.ok().put("data", page);
+        return Response.ok().put("data", page);
     }
 
     /**
      * 信息
      */
     @RequestMapping("/info/{id}")
-    public R info(@PathVariable("id") String id){
+    public Response info(@PathVariable("id") String id){
         ConfigEntity config = configService.selectById(id);
-        return R.ok().put("data", config);
+        return Response.ok().put("data", config);
     }
     
     /**
@@ -66,46 +66,46 @@ public class ConfigController{
      */
     @IgnoreAuth
     @RequestMapping("/detail/{id}")
-    public R detail(@PathVariable("id") String id){
+    public Response detail(@PathVariable("id") String id){
         ConfigEntity config = configService.selectById(id);
-        return R.ok().put("data", config);
+        return Response.ok().put("data", config);
     }
     
     /**
      * 根据name获取信息
      */
     @RequestMapping("/info")
-    public R infoByName(@RequestParam String name){
+    public Response infoByName(@RequestParam String name){
         ConfigEntity config = configService.selectOne(new EntityWrapper<ConfigEntity>().eq("name", "faceFile"));
-        return R.ok().put("data", config);
+        return Response.ok().put("data", config);
     }
     
     /**
      * 保存
      */
     @PostMapping("/save")
-    public R save(@RequestBody ConfigEntity config){
+    public Response save(@RequestBody ConfigEntity config){
 //    	ValidatorUtils.validateEntity(config);
     	configService.insert(config);
-        return R.ok();
+        return Response.ok();
     }
 
     /**
      * 修改
      */
     @RequestMapping("/update")
-    public R update(@RequestBody ConfigEntity config){
+    public Response update(@RequestBody ConfigEntity config){
 //        ValidatorUtils.validateEntity(config);
         configService.updateById(config);//全部更新
-        return R.ok();
+        return Response.ok();
     }
 
     /**
      * 删除
      */
     @RequestMapping("/delete")
-    public R delete(@RequestBody Long[] ids){
+    public Response delete(@RequestBody Long[] ids){
     	configService.deleteBatchIds(Arrays.asList(ids));
-        return R.ok();
+        return Response.ok();
     }
 }

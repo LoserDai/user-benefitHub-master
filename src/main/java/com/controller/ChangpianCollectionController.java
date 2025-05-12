@@ -29,7 +29,7 @@ import com.entity.*;
 import com.entity.view.*;
 import com.service.*;
 import com.utils.PageUtils;
-import com.utils.R;
+import com.utils.Response;
 import com.alibaba.fastjson.*;
 
 /**
@@ -65,11 +65,11 @@ public class ChangpianCollectionController {
     * 后端列表
     */
     @RequestMapping("/page")
-    public R page(@RequestParam Map<String, Object> params, HttpServletRequest request){
+    public Response page(@RequestParam Map<String, Object> params, HttpServletRequest request){
         logger.debug("page方法:,,Controller:{},,params:{}",this.getClass().getName(),JSONObject.toJSONString(params));
         String role = String.valueOf(request.getSession().getAttribute("role"));
         if(false)
-            return R.error(511,"Access is forbidden, please contact the system administrator!");
+            return Response.error(511,"Access is forbidden, please contact the system administrator!");
         else if("用户".equals(role))
             params.put("yonghuId",request.getSession().getAttribute("userId"));
         if(params.get("orderBy")==null || params.get("orderBy")==""){
@@ -83,14 +83,14 @@ public class ChangpianCollectionController {
             //修改对应字典表字段
             dictionaryService.dictionaryConvert(c, request);
         }
-        return R.ok().put("data", page);
+        return Response.ok().put("data", page);
     }
 
     /**
     * 后端详情
     */
     @RequestMapping("/info/{id}")
-    public R info(@PathVariable("id") Long id, HttpServletRequest request){
+    public Response info(@PathVariable("id") Long id, HttpServletRequest request){
         logger.debug("info方法:,,Controller:{},,id:{}",this.getClass().getName(),id);
         ChangpianCollectionEntity changpianCollection = changpianCollectionService.selectById(id);
         if(changpianCollection !=null){
@@ -112,9 +112,9 @@ public class ChangpianCollectionController {
                 }
             //修改对应字典表字段
             dictionaryService.dictionaryConvert(view, request);
-            return R.ok().put("data", view);
+            return Response.ok().put("data", view);
         }else {
-            return R.error(511,"查不到数据");
+            return Response.error(511,"查不到数据");
         }
 
     }
@@ -123,12 +123,12 @@ public class ChangpianCollectionController {
     * 后端保存
     */
     @RequestMapping("/save")
-    public R save(@RequestBody ChangpianCollectionEntity changpianCollection, HttpServletRequest request){
+    public Response save(@RequestBody ChangpianCollectionEntity changpianCollection, HttpServletRequest request){
         logger.debug("save方法:,,Controller:{},,changpianCollection:{}",this.getClass().getName(),changpianCollection.toString());
 
         String role = String.valueOf(request.getSession().getAttribute("role"));
         if(false)
-            return R.error(511,"永远不会进入");
+            return Response.error(511,"永远不会进入");
         else if("用户".equals(role))
             changpianCollection.setYonghuId(Integer.valueOf(String.valueOf(request.getSession().getAttribute("userId"))));
 
@@ -144,9 +144,9 @@ public class ChangpianCollectionController {
             changpianCollection.setInsertTime(new Date());
             changpianCollection.setCreateTime(new Date());
             changpianCollectionService.insert(changpianCollection);
-            return R.ok();
+            return Response.ok();
         }else {
-            return R.error(511,"表中有相同数据");
+            return Response.error(511,"表中有相同数据");
         }
     }
 
@@ -154,12 +154,12 @@ public class ChangpianCollectionController {
     * 后端修改
     */
     @RequestMapping("/update")
-    public R update(@RequestBody ChangpianCollectionEntity changpianCollection, HttpServletRequest request){
+    public Response update(@RequestBody ChangpianCollectionEntity changpianCollection, HttpServletRequest request){
         logger.debug("update方法:,,Controller:{},,changpianCollection:{}",this.getClass().getName(),changpianCollection.toString());
 
         String role = String.valueOf(request.getSession().getAttribute("role"));
 //        if(false)
-//            return R.error(511,"永远不会进入");
+//            return Response.error(511,"永远不会进入");
 //        else if("用户".equals(role))
 //            changpianCollection.setYonghuId(Integer.valueOf(String.valueOf(request.getSession().getAttribute("userId"))));
         //根据字段查询是否有相同数据
@@ -175,9 +175,9 @@ public class ChangpianCollectionController {
         ChangpianCollectionEntity changpianCollectionEntity = changpianCollectionService.selectOne(queryWrapper);
         if(changpianCollectionEntity==null){
             changpianCollectionService.updateById(changpianCollection);//根据id更新
-            return R.ok();
+            return Response.ok();
         }else {
-            return R.error(511,"表中有相同数据");
+            return Response.error(511,"表中有相同数据");
         }
     }
 
@@ -187,10 +187,10 @@ public class ChangpianCollectionController {
     * 删除
     */
     @RequestMapping("/delete")
-    public R delete(@RequestBody Integer[] ids){
+    public Response delete(@RequestBody Integer[] ids){
         logger.debug("delete:,,Controller:{},,ids:{}",this.getClass().getName(),ids.toString());
         changpianCollectionService.deleteBatchIds(Arrays.asList(ids));
-        return R.ok();
+        return Response.ok();
     }
 
 
@@ -198,7 +198,7 @@ public class ChangpianCollectionController {
      * 批量上传
      */
     @RequestMapping("/batchInsert")
-    public R save( String fileName, HttpServletRequest request){
+    public Response save( String fileName, HttpServletRequest request){
         logger.debug("batchInsert方法:,,Controller:{},,fileName:{}",this.getClass().getName(),fileName);
         Integer yonghuId = Integer.valueOf(String.valueOf(request.getSession().getAttribute("userId")));
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -208,16 +208,16 @@ public class ChangpianCollectionController {
             Date date = new Date();
             int lastIndexOf = fileName.lastIndexOf(".");
             if(lastIndexOf == -1){
-                return R.error(511,"该文件没有后缀");
+                return Response.error(511,"该文件没有后缀");
             }else{
                 String suffix = fileName.substring(lastIndexOf);
                 if(!".xls".equals(suffix)){
-                    return R.error(511,"只支持后缀为xls的excel文件");
+                    return Response.error(511,"只支持后缀为xls的excel文件");
                 }else{
                     URL resource = this.getClass().getClassLoader().getResource("../../upload/" + fileName);//获取文件路径
                     File file = new File(resource.getFile());
                     if(!file.exists()){
-                        return R.error(511,"找不到上传文件，请联系管理员");
+                        return Response.error(511,"找不到上传文件，请联系管理员");
                     }else{
                         List<List<String>> dataList = PoiUtil.poiImport(file.getPath());//读取xls文件
                         dataList.remove(0);//删除第一行，因为第一行是提示
@@ -237,13 +237,13 @@ public class ChangpianCollectionController {
 
                         //查询是否重复
                         changpianCollectionService.insertBatch(changpianCollectionList);
-                        return R.ok();
+                        return Response.ok();
                     }
                 }
             }
         }catch (Exception e){
             e.printStackTrace();
-            return R.error(511,"批量插入数据异常，请联系管理员");
+            return Response.error(511,"批量插入数据异常，请联系管理员");
         }
     }
 
@@ -256,7 +256,7 @@ public class ChangpianCollectionController {
     */
     @IgnoreAuth
     @RequestMapping("/list")
-    public R list(@RequestParam Map<String, Object> params, HttpServletRequest request){
+    public Response list(@RequestParam Map<String, Object> params, HttpServletRequest request){
         logger.debug("list方法:,,Controller:{},,params:{}",this.getClass().getName(),JSONObject.toJSONString(params));
 
         // 没有指定排序字段就默认id倒序
@@ -269,14 +269,14 @@ public class ChangpianCollectionController {
         List<ChangpianCollectionView> list =(List<ChangpianCollectionView>)page.getList();
         for(ChangpianCollectionView c:list)
             dictionaryService.dictionaryConvert(c, request); //修改对应字典表字段
-        return R.ok().put("data", page);
+        return Response.ok().put("data", page);
     }
 
     /**
     * 前端详情
     */
     @RequestMapping("/detail/{id}")
-    public R detail(@PathVariable("id") Long id, HttpServletRequest request){
+    public Response detail(@PathVariable("id") Long id, HttpServletRequest request){
         logger.debug("detail方法:,,Controller:{},,id:{}",this.getClass().getName(),id);
         ChangpianCollectionEntity changpianCollection = changpianCollectionService.selectById(id);
             if(changpianCollection !=null){
@@ -300,9 +300,9 @@ public class ChangpianCollectionController {
                 }
                 //修改对应字典表字段
                 dictionaryService.dictionaryConvert(view, request);
-                return R.ok().put("data", view);
+                return Response.ok().put("data", view);
             }else {
-                return R.error(511,"查不到数据");
+                return Response.error(511,"查不到数据");
             }
     }
 
@@ -311,7 +311,7 @@ public class ChangpianCollectionController {
     * 前端保存
     */
     @RequestMapping("/add")
-    public R add(@RequestBody ChangpianCollectionEntity changpianCollection, HttpServletRequest request){
+    public Response add(@RequestBody ChangpianCollectionEntity changpianCollection, HttpServletRequest request){
         logger.debug("add方法:,,Controller:{},,changpianCollection:{}",this.getClass().getName(),changpianCollection.toString());
         Wrapper<ChangpianCollectionEntity> queryWrapper = new EntityWrapper<ChangpianCollectionEntity>()
             .eq("changpian_id", changpianCollection.getChangpianId())
@@ -324,9 +324,9 @@ public class ChangpianCollectionController {
             changpianCollection.setInsertTime(new Date());
             changpianCollection.setCreateTime(new Date());
         changpianCollectionService.insert(changpianCollection);
-            return R.ok();
+            return Response.ok();
         }else {
-            return R.error(511,"您已经收藏过了");
+            return Response.error(511,"您已经收藏过了");
         }
     }
 

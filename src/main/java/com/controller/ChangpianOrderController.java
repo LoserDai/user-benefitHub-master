@@ -29,7 +29,7 @@ import com.entity.*;
 import com.entity.view.*;
 import com.service.*;
 import com.utils.PageUtils;
-import com.utils.R;
+import com.utils.Response;
 import com.alibaba.fastjson.*;
 
 /**
@@ -71,11 +71,11 @@ private ChangpianCommentbackService changpianCommentbackService;
     * 后端列表
     */
     @RequestMapping("/page")
-    public R page(@RequestParam Map<String, Object> params, HttpServletRequest request){
+    public Response page(@RequestParam Map<String, Object> params, HttpServletRequest request){
         logger.debug("page方法:,,Controller:{},,params:{}",this.getClass().getName(),JSONObject.toJSONString(params));
         String role = String.valueOf(request.getSession().getAttribute("role"));
         if(false)
-            return R.error(511,"Access is forbidden, please contact the system administrator!");
+            return Response.error(511,"Access is forbidden, please contact the system administrator!");
         else if("用户".equals(role))
             params.put("yonghuId",request.getSession().getAttribute("userId"));
         if(params.get("orderBy")==null || params.get("orderBy")==""){
@@ -89,14 +89,14 @@ private ChangpianCommentbackService changpianCommentbackService;
             //修改对应字典表字段
             dictionaryService.dictionaryConvert(c, request);
         }
-        return R.ok().put("data", page);
+        return Response.ok().put("data", page);
     }
 
     /**
     * 后端详情
     */
     @RequestMapping("/info/{id}")
-    public R info(@PathVariable("id") Long id, HttpServletRequest request){
+    public Response info(@PathVariable("id") Long id, HttpServletRequest request){
         logger.debug("info方法:,,Controller:{},,id:{}",this.getClass().getName(),id);
         ChangpianOrderEntity changpianOrder = changpianOrderService.selectById(id);
         if(changpianOrder !=null){
@@ -125,9 +125,9 @@ private ChangpianCommentbackService changpianCommentbackService;
                 }
             //修改对应字典表字段
             dictionaryService.dictionaryConvert(view, request);
-            return R.ok().put("data", view);
+            return Response.ok().put("data", view);
         }else {
-            return R.error(511,"查不到数据");
+            return Response.error(511,"查不到数据");
         }
 
     }
@@ -136,31 +136,31 @@ private ChangpianCommentbackService changpianCommentbackService;
     * 后端保存
     */
     @RequestMapping("/save")
-    public R save(@RequestBody ChangpianOrderEntity changpianOrder, HttpServletRequest request){
+    public Response save(@RequestBody ChangpianOrderEntity changpianOrder, HttpServletRequest request){
         logger.debug("save方法:,,Controller:{},,changpianOrder:{}",this.getClass().getName(),changpianOrder.toString());
 
         String role = String.valueOf(request.getSession().getAttribute("role"));
         if(false)
-            return R.error(511,"永远不会进入");
+            return Response.error(511,"永远不会进入");
         else if("用户".equals(role))
             changpianOrder.setYonghuId(Integer.valueOf(String.valueOf(request.getSession().getAttribute("userId"))));
 
         changpianOrder.setInsertTime(new Date());
         changpianOrder.setCreateTime(new Date());
         changpianOrderService.insert(changpianOrder);
-        return R.ok();
+        return Response.ok();
     }
 
     /**
     * 后端修改
     */
     @RequestMapping("/update")
-    public R update(@RequestBody ChangpianOrderEntity changpianOrder, HttpServletRequest request){
+    public Response update(@RequestBody ChangpianOrderEntity changpianOrder, HttpServletRequest request){
         logger.debug("update方法:,,Controller:{},,changpianOrder:{}",this.getClass().getName(),changpianOrder.toString());
 
         String role = String.valueOf(request.getSession().getAttribute("role"));
 //        if(false)
-//            return R.error(511,"永远不会进入");
+//            return Response.error(511,"永远不会进入");
 //        else if("用户".equals(role))
 //            changpianOrder.setYonghuId(Integer.valueOf(String.valueOf(request.getSession().getAttribute("userId"))));
         //根据字段查询是否有相同数据
@@ -172,9 +172,9 @@ private ChangpianCommentbackService changpianCommentbackService;
         ChangpianOrderEntity changpianOrderEntity = changpianOrderService.selectOne(queryWrapper);
         if(changpianOrderEntity==null){
             changpianOrderService.updateById(changpianOrder);//根据id更新
-            return R.ok();
+            return Response.ok();
         }else {
-            return R.error(511,"表中有相同数据");
+            return Response.error(511,"表中有相同数据");
         }
     }
 
@@ -184,10 +184,10 @@ private ChangpianCommentbackService changpianCommentbackService;
     * 删除
     */
     @RequestMapping("/delete")
-    public R delete(@RequestBody Integer[] ids){
+    public Response delete(@RequestBody Integer[] ids){
         logger.debug("delete:,,Controller:{},,ids:{}",this.getClass().getName(),ids.toString());
         changpianOrderService.deleteBatchIds(Arrays.asList(ids));
-        return R.ok();
+        return Response.ok();
     }
 
 
@@ -195,7 +195,7 @@ private ChangpianCommentbackService changpianCommentbackService;
      * 批量上传
      */
     @RequestMapping("/batchInsert")
-    public R save( String fileName, HttpServletRequest request){
+    public Response save( String fileName, HttpServletRequest request){
         logger.debug("batchInsert方法:,,Controller:{},,fileName:{}",this.getClass().getName(),fileName);
         Integer yonghuId = Integer.valueOf(String.valueOf(request.getSession().getAttribute("userId")));
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -205,16 +205,16 @@ private ChangpianCommentbackService changpianCommentbackService;
             Date date = new Date();
             int lastIndexOf = fileName.lastIndexOf(".");
             if(lastIndexOf == -1){
-                return R.error(511,"该文件没有后缀");
+                return Response.error(511,"该文件没有后缀");
             }else{
                 String suffix = fileName.substring(lastIndexOf);
                 if(!".xls".equals(suffix)){
-                    return R.error(511,"只支持后缀为xls的excel文件");
+                    return Response.error(511,"只支持后缀为xls的excel文件");
                 }else{
                     URL resource = this.getClass().getClassLoader().getResource("../../upload/" + fileName);//获取文件路径
                     File file = new File(resource.getFile());
                     if(!file.exists()){
-                        return R.error(511,"找不到上传文件，请联系管理员");
+                        return Response.error(511,"找不到上传文件，请联系管理员");
                     }else{
                         List<List<String>> dataList = PoiUtil.poiImport(file.getPath());//读取xls文件
                         dataList.remove(0);//删除第一行，因为第一行是提示
@@ -256,16 +256,16 @@ private ChangpianCommentbackService changpianCommentbackService;
                             for(ChangpianOrderEntity s:changpianOrderEntities_changpianOrderUuidNumber){
                                 repeatFields.add(s.getChangpianOrderUuidNumber());
                             }
-                            return R.error(511,"数据库的该表中的 [订单号] 字段已经存在 存在数据为:"+repeatFields.toString());
+                            return Response.error(511,"数据库的该表中的 [订单号] 字段已经存在 存在数据为:"+repeatFields.toString());
                         }
                         changpianOrderService.insertBatch(changpianOrderList);
-                        return R.ok();
+                        return Response.ok();
                     }
                 }
             }
         }catch (Exception e){
             e.printStackTrace();
-            return R.error(511,"批量插入数据异常，请联系管理员");
+            return Response.error(511,"批量插入数据异常，请联系管理员");
         }
     }
 
@@ -278,7 +278,7 @@ private ChangpianCommentbackService changpianCommentbackService;
     */
     @IgnoreAuth
     @RequestMapping("/list")
-    public R list(@RequestParam Map<String, Object> params, HttpServletRequest request){
+    public Response list(@RequestParam Map<String, Object> params, HttpServletRequest request){
         logger.debug("list方法:,,Controller:{},,params:{}",this.getClass().getName(),JSONObject.toJSONString(params));
 
         // 没有指定排序字段就默认id倒序
@@ -291,14 +291,14 @@ private ChangpianCommentbackService changpianCommentbackService;
         List<ChangpianOrderView> list =(List<ChangpianOrderView>)page.getList();
         for(ChangpianOrderView c:list)
             dictionaryService.dictionaryConvert(c, request); //修改对应字典表字段
-        return R.ok().put("data", page);
+        return Response.ok().put("data", page);
     }
 
     /**
     * 前端详情
     */
     @RequestMapping("/detail/{id}")
-    public R detail(@PathVariable("id") Long id, HttpServletRequest request){
+    public Response detail(@PathVariable("id") Long id, HttpServletRequest request){
         logger.debug("detail方法:,,Controller:{},,id:{}",this.getClass().getName(),id);
         ChangpianOrderEntity changpianOrder = changpianOrderService.selectById(id);
             if(changpianOrder !=null){
@@ -328,9 +328,9 @@ private ChangpianCommentbackService changpianCommentbackService;
                 }
                 //修改对应字典表字段
                 dictionaryService.dictionaryConvert(view, request);
-                return R.ok().put("data", view);
+                return Response.ok().put("data", view);
             }else {
-                return R.error(511,"查不到数据");
+                return Response.error(511,"查不到数据");
             }
     }
 
@@ -339,21 +339,21 @@ private ChangpianCommentbackService changpianCommentbackService;
     * 前端保存
     */
     @RequestMapping("/add")
-    public R add(@RequestBody ChangpianOrderEntity changpianOrder, HttpServletRequest request){
+    public Response add(@RequestBody ChangpianOrderEntity changpianOrder, HttpServletRequest request){
         logger.debug("add方法:,,Controller:{},,changpianOrder:{}",this.getClass().getName(),changpianOrder.toString());
             ChangpianEntity changpianEntity = changpianService.selectById(changpianOrder.getChangpianId());
             if(changpianEntity == null){
-                return R.error(511,"查不到该商品");
+                return Response.error(511,"查不到该商品");
             }
             // Double changpianNewMoney = changpianEntity.getChangpianNewMoney();
 
             if(false){
             }
             else if((changpianEntity.getChangpianKucunNumber() -changpianOrder.getBuyNumber())<0){
-                return R.error(511,"购买数量不能大于库存数量");
+                return Response.error(511,"购买数量不能大于库存数量");
             }
             else if(changpianEntity.getChangpianNewMoney() == null){
-                return R.error(511,"商品价格不能为空");
+                return Response.error(511,"商品价格不能为空");
             }
 
             //计算所获得积分
@@ -361,12 +361,12 @@ private ChangpianCommentbackService changpianCommentbackService;
             Integer userId = (Integer) request.getSession().getAttribute("userId");
             YonghuEntity yonghuEntity = yonghuService.selectById(userId);
             if(yonghuEntity == null)
-                return R.error(511,"用户不能为空");
+                return Response.error(511,"用户不能为空");
             if(yonghuEntity.getNewMoney() == null)
-                return R.error(511,"用户金额不能为空");
+                return Response.error(511,"用户金额不能为空");
             double balance = yonghuEntity.getNewMoney() - changpianEntity.getChangpianNewMoney()*changpianOrder.getBuyNumber();//余额
             if(balance<0)
-                return R.error(511,"余额不够支付");
+                return Response.error(511,"余额不够支付");
             changpianOrder.setChangpianOrderTypes(1); //设置订单状态为已支付
             changpianOrder.setChangpianOrderTruePrice(changpianEntity.getChangpianNewMoney()*changpianOrder.getBuyNumber()); //设置实付价格
             changpianOrder.setYonghuId(userId); //设置订单支付人id
@@ -379,13 +379,13 @@ private ChangpianCommentbackService changpianCommentbackService;
                 changpianOrderService.insert(changpianOrder);//新增订单
             yonghuEntity.setNewMoney(balance);//设置金额
             yonghuService.updateById(yonghuEntity);
-            return R.ok();
+            return Response.ok();
     }
     /**
      * 添加订单
      */
     @RequestMapping("/order")
-    public R add(@RequestParam Map<String, Object> params, HttpServletRequest request){
+    public Response add(@RequestParam Map<String, Object> params, HttpServletRequest request){
         logger.debug("order方法:,,Controller:{},,params:{}",this.getClass().getName(),params.toString());
         String changpianOrderUuidNumber = String.valueOf(new Date().getTime());
 
@@ -424,7 +424,7 @@ private ChangpianCommentbackService changpianCommentbackService;
             //判断商品的库存是否足够
             if(changpianEntity.getChangpianKucunNumber() < buyNumber){
                 //商品库存不足直接返回
-                return R.error(changpianEntity.getChangpianName()+"的库存不足");
+                return Response.error(changpianEntity.getChangpianName()+"的库存不足");
             }else{
                 //商品库存充足就减库存
                 changpianEntity.setChangpianKucunNumber(changpianEntity.getChangpianKucunNumber() - buyNumber);
@@ -450,7 +450,7 @@ private ChangpianCommentbackService changpianCommentbackService;
                 Double money = new BigDecimal(changpianEntity.getChangpianNewMoney()).multiply(new BigDecimal(buyNumber)).multiply(zhekou).doubleValue();
 
                 if(yonghuEntity.getNewMoney() - money <0 ){
-                    return R.error("余额不足,请充值！！！");
+                    return Response.error("余额不足,请充值！！！");
                 }else{
                     //计算所获得积分
                     Double buyJifen =0.0;
@@ -470,14 +470,14 @@ private ChangpianCommentbackService changpianCommentbackService;
         yonghuService.updateById(yonghuEntity);
         if(cartIds != null && cartIds.size()>0)
             cartService.deleteBatchIds(cartIds);
-        return R.ok();
+        return Response.ok();
     }
 
     /**
     * 退款
     */
     @RequestMapping("/refund")
-    public R refund(Integer id, HttpServletRequest request){
+    public Response refund(Integer id, HttpServletRequest request){
         logger.debug("refund方法:,,Controller:{},,id:{}",this.getClass().getName(),id);
         String role = String.valueOf(request.getSession().getAttribute("role"));
 
@@ -486,20 +486,20 @@ private ChangpianCommentbackService changpianCommentbackService;
             Integer changpianOrderPaymentTypes = changpianOrder.getChangpianOrderPaymentTypes();
             Integer changpianId = changpianOrder.getChangpianId();
             if(changpianId == null)
-                return R.error(511,"查不到该商品");
+                return Response.error(511,"查不到该商品");
             ChangpianEntity changpianEntity = changpianService.selectById(changpianId);
             if(changpianEntity == null)
-                return R.error(511,"查不到该商品");
+                return Response.error(511,"查不到该商品");
             Double changpianNewMoney = changpianEntity.getChangpianNewMoney();
             if(changpianNewMoney == null)
-                return R.error(511,"商品价格不能为空");
+                return Response.error(511,"商品价格不能为空");
 
             Integer userId = (Integer) request.getSession().getAttribute("userId");
             YonghuEntity yonghuEntity = yonghuService.selectById(userId);
             if(yonghuEntity == null)
-                return R.error(511,"用户不能为空");
+                return Response.error(511,"用户不能为空");
             if(yonghuEntity.getNewMoney() == null)
-                return R.error(511,"用户金额不能为空");
+                return Response.error(511,"用户金额不能为空");
 
             Double zhekou = 1.0;
 
@@ -523,7 +523,7 @@ private ChangpianCommentbackService changpianCommentbackService;
             changpianOrderService.updateById(changpianOrder);//根据id更新
             yonghuService.updateById(yonghuEntity);//更新用户信息
             changpianService.updateById(changpianEntity);//更新订单中商品的信息
-            return R.ok();
+            return Response.ok();
     }
 
 
@@ -531,7 +531,7 @@ private ChangpianCommentbackService changpianCommentbackService;
      * 发货
      */
     @RequestMapping("/deliver")
-    public R deliver(Integer id ,String changpianOrderCourierNumber, String changpianOrderCourierName){
+    public Response deliver(Integer id ,String changpianOrderCourierNumber, String changpianOrderCourierName){
         logger.debug("refund:,,Controller:{},,ids:{}",this.getClass().getName(),id.toString());
         ChangpianOrderEntity  changpianOrderEntity = new  ChangpianOrderEntity();;
         changpianOrderEntity.setId(id);
@@ -540,9 +540,9 @@ private ChangpianCommentbackService changpianCommentbackService;
         changpianOrderEntity.setChangpianOrderCourierName(changpianOrderCourierName);
         boolean b =  changpianOrderService.updateById( changpianOrderEntity);
         if(!b){
-            return R.error("发货出错");
+            return Response.error("发货出错");
         }
-        return R.ok();
+        return Response.ok();
     }
 
 
@@ -562,16 +562,16 @@ private ChangpianCommentbackService changpianCommentbackService;
      * 收货
      */
     @RequestMapping("/receiving")
-    public R receiving(Integer id){
+    public Response receiving(Integer id){
         logger.debug("refund:,,Controller:{},,ids:{}",this.getClass().getName(),id.toString());
         ChangpianOrderEntity  changpianOrderEntity = new  ChangpianOrderEntity();
         changpianOrderEntity.setId(id);
         changpianOrderEntity.setChangpianOrderTypes(4);
         boolean b =  changpianOrderService.updateById( changpianOrderEntity);
         if(!b){
-            return R.error("收货出错");
+            return Response.error("收货出错");
         }
-        return R.ok();
+        return Response.ok();
     }
 
 
@@ -580,16 +580,16 @@ private ChangpianCommentbackService changpianCommentbackService;
     * 评价
     */
     @RequestMapping("/commentback")
-    public R commentback(Integer id, String commentbackText, Integer changpianCommentbackPingfenNumber, HttpServletRequest request){
+    public Response commentback(Integer id, String commentbackText, Integer changpianCommentbackPingfenNumber, HttpServletRequest request){
         logger.debug("commentback方法:,,Controller:{},,id:{}",this.getClass().getName(),id);
             ChangpianOrderEntity changpianOrder = changpianOrderService.selectById(id);
         if(changpianOrder == null)
-            return R.error(511,"查不到该订单");
+            return Response.error(511,"查不到该订单");
         if(changpianOrder.getChangpianOrderTypes() != 4)
-            return R.error(511,"您不能评价");
+            return Response.error(511,"您不能评价");
         Integer changpianId = changpianOrder.getChangpianId();
         if(changpianId == null)
-            return R.error(511,"查不到该商品");
+            return Response.error(511,"查不到该商品");
 
         ChangpianCommentbackEntity changpianCommentbackEntity = new ChangpianCommentbackEntity();
             changpianCommentbackEntity.setId(id);
@@ -604,7 +604,7 @@ private ChangpianCommentbackService changpianCommentbackService;
 
             changpianOrder.setChangpianOrderTypes(5);//设置订单状态为已评价
             changpianOrderService.updateById(changpianOrder);//根据id更新
-            return R.ok();
+            return Response.ok();
     }
 
 

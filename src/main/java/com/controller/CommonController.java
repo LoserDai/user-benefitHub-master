@@ -33,7 +33,7 @@ import com.service.CommonService;
 import com.service.ConfigService;
 import com.utils.BaiduUtil;
 import com.utils.FileUtil;
-import com.utils.R;
+import com.utils.Response;
 
 /**
  * 通用接口
@@ -52,15 +52,15 @@ public class CommonController{
 	private static String BAIDU_DITU_AK = null;
 	
 	@RequestMapping("/location")
-	public R location(String lng,String lat) {
+	public Response location(String lng,String lat) {
 		if(BAIDU_DITU_AK==null) {
 			BAIDU_DITU_AK = configService.selectOne(new EntityWrapper<ConfigEntity>().eq("name", "baidu_ditu_ak")).getValue();
 			if(BAIDU_DITU_AK==null) {
-				return R.error("请在配置管理中正确配置baidu_ditu_ak");
+				return Response.error("请在配置管理中正确配置baidu_ditu_ak");
 			}
 		}
 		Map<String, String> map = BaiduUtil.getCityByLonLat(BAIDU_DITU_AK, lng, lat);
-		return R.ok().put("data", map);
+		return Response.ok().put("data", map);
 	}
 	
 	/**
@@ -71,14 +71,14 @@ public class CommonController{
 	 * @return
 	 */
 	@RequestMapping("/matchFace")
-	public R matchFace(String face1, String face2, HttpServletRequest request) {
+	public Response matchFace(String face1, String face2, HttpServletRequest request) {
 		if(client==null) {
 			/*String AppID = configService.selectOne(new EntityWrapper<ConfigEntity>().eq("name", "AppID")).getValue();*/
 			String APIKey = configService.selectOne(new EntityWrapper<ConfigEntity>().eq("name", "APIKey")).getValue();
 			String SecretKey = configService.selectOne(new EntityWrapper<ConfigEntity>().eq("name", "SecretKey")).getValue();
 			String token = BaiduUtil.getAuth(APIKey, SecretKey);
 			if(token==null) {
-				return R.error("请在配置管理中正确配置APIKey和SecretKey");
+				return Response.error("请在配置管理中正确配置APIKey和SecretKey");
 			}
 			client = new AipFace(null, APIKey, SecretKey);
 			client.setConnectionTimeoutInMillis(2000);
@@ -99,11 +99,11 @@ public class CommonController{
 			System.out.println(res.get("result"));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-			return R.error("文件不存在");
+			return Response.error("文件不存在");
 		} catch (IOException e) {
 			e.printStackTrace();
 		} 
-		return R.ok().put("data", com.alibaba.fastjson.JSONObject.parse(res.get("result").toString()));
+		return Response.ok().put("data", com.alibaba.fastjson.JSONObject.parse(res.get("result").toString()));
 	}
     
 	/**
@@ -112,7 +112,7 @@ public class CommonController{
 	 */
 	@RequestMapping("/option/{tableName}/{columnName}")
 	@IgnoreAuth
-	public R getOption(@PathVariable("tableName") String tableName, @PathVariable("columnName") String columnName,String level,String parent) {
+	public Response getOption(@PathVariable("tableName") String tableName, @PathVariable("columnName") String columnName,String level,String parent) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("table", tableName);
 		params.put("column", columnName);
@@ -123,7 +123,7 @@ public class CommonController{
 			params.put("parent", parent);
 		}
 		List<String> data = commonService.getOption(params);
-		return R.ok().put("data", data);
+		return Response.ok().put("data", data);
 	}
 	
 	/**
@@ -132,13 +132,13 @@ public class CommonController{
 	 */
 	@RequestMapping("/follow/{tableName}/{columnName}")
 	@IgnoreAuth
-	public R getFollowByOption(@PathVariable("tableName") String tableName, @PathVariable("columnName") String columnName, @RequestParam String columnValue) {
+	public Response getFollowByOption(@PathVariable("tableName") String tableName, @PathVariable("columnName") String columnName, @RequestParam String columnValue) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("table", tableName);
 		params.put("column", columnName);
 		params.put("columnValue", columnValue);
 		Map<String, Object> result = commonService.getFollowByOption(params);
-		return R.ok().put("data", result);
+		return Response.ok().put("data", result);
 	}
 	
 	/**
@@ -147,10 +147,10 @@ public class CommonController{
 	 * @return
 	 */
 	@RequestMapping("/sh/{tableName}")
-	public R sh(@PathVariable("tableName") String tableName, @RequestBody Map<String, Object> map) {
+	public Response sh(@PathVariable("tableName") String tableName, @RequestBody Map<String, Object> map) {
 		map.put("table", tableName);
 		commonService.sh(map);
-		return R.ok();
+		return Response.ok();
 	}
 	
 	/**
@@ -163,7 +163,7 @@ public class CommonController{
 	 */
 	@RequestMapping("/remind/{tableName}/{columnName}/{type}")
 	@IgnoreAuth
-	public R remindCount(@PathVariable("tableName") String tableName, @PathVariable("columnName") String columnName, 
+	public Response remindCount(@PathVariable("tableName") String tableName, @PathVariable("columnName") String columnName, 
 						 @PathVariable("type") String type,@RequestParam Map<String, Object> map) {
 		map.put("table", tableName);
 		map.put("column", columnName);
@@ -191,7 +191,7 @@ public class CommonController{
 		}
 		
 		int count = commonService.remindCount(map);
-		return R.ok().put("count", count);
+		return Response.ok().put("count", count);
 	}
 
 	/**
@@ -199,10 +199,10 @@ public class CommonController{
 	 */
 	@IgnoreAuth
 	@RequestMapping("/group/{tableName}")
-	public R group1(@PathVariable("tableName") String tableName, @RequestParam Map<String,Object> params) {
+	public Response group1(@PathVariable("tableName") String tableName, @RequestParam Map<String,Object> params) {
 		params.put("table1", tableName);
 		List<Map<String, Object>> result = commonService.chartBoth(params);
-		return R.ok().put("data", result);
+		return Response.ok().put("data", result);
 	}
 
 
@@ -211,12 +211,12 @@ public class CommonController{
 	 */
 	@RequestMapping("/cal/{tableName}/{columnName}")
 	@IgnoreAuth
-	public R cal(@PathVariable("tableName") String tableName, @PathVariable("columnName") String columnName) {
+	public Response cal(@PathVariable("tableName") String tableName, @PathVariable("columnName") String columnName) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("table", tableName);
 		params.put("column", columnName);
 		Map<String, Object> result = commonService.selectCal(params);
-		return R.ok().put("data", result);
+		return Response.ok().put("data", result);
 	}
 	
 	/**
@@ -224,12 +224,12 @@ public class CommonController{
 	 */
 	@RequestMapping("/group/{tableName}/{columnName}")
 	@IgnoreAuth
-	public R group(@PathVariable("tableName") String tableName, @PathVariable("columnName") String columnName) {
+	public Response group(@PathVariable("tableName") String tableName, @PathVariable("columnName") String columnName) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("table", tableName);
 		params.put("column", columnName);
 		List<Map<String, Object>> result = commonService.selectGroup(params);
-		return R.ok().put("data", result);
+		return Response.ok().put("data", result);
 	}
 	
 	/**
@@ -237,13 +237,13 @@ public class CommonController{
 	 */
 	@RequestMapping("/value/{tableName}/{xColumnName}/{yColumnName}")
 	@IgnoreAuth
-	public R value(@PathVariable("tableName") String tableName, @PathVariable("yColumnName") String yColumnName, @PathVariable("xColumnName") String xColumnName) {
+	public Response value(@PathVariable("tableName") String tableName, @PathVariable("yColumnName") String yColumnName, @PathVariable("xColumnName") String xColumnName) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("table", tableName);
 		params.put("xColumn", xColumnName);
 		params.put("yColumn", yColumnName);
 		List<Map<String, Object>> result = commonService.selectValue(params);
-		return R.ok().put("data", result);
+		return Response.ok().put("data", result);
 	}
 
 
@@ -262,10 +262,10 @@ public class CommonController{
 	 * @return
 	 */
 	@RequestMapping("/newSelectGroupSum")
-	public R newSelectGroupSum(@RequestParam Map<String,Object> params) {
+	public Response newSelectGroupSum(@RequestParam Map<String,Object> params) {
 		logger.debug("newSelectGroupSum:,,Controller:{},,params:{}",this.getClass().getName(),params);
 		List<Map<String, Object>> result = commonService.newSelectGroupSum(params);
-		return R.ok().put("data", result);
+		return Response.ok().put("data", result);
 	}
 
 
@@ -281,10 +281,10 @@ public class CommonController{
      * */
     @IgnoreAuth
     @RequestMapping("/queryScore")
-    public R queryScore(@RequestParam Map<String, Object> params) {
+    public Response queryScore(@RequestParam Map<String, Object> params) {
         logger.debug("queryScore:,,Controller:{},,params:{}",this.getClass().getName(),params);
         Map<String, Object> queryScore = commonService.queryScore(params);
-        return R.ok().put("data", queryScore);
+        return Response.ok().put("data", queryScore);
     }
 
 	/**
@@ -294,10 +294,10 @@ public class CommonController{
 	 * @return
 	 */
 	@RequestMapping("/newSelectGroupCount")
-	public R newSelectGroupCount(@RequestParam Map<String,Object> params) {
+	public Response newSelectGroupCount(@RequestParam Map<String,Object> params) {
 		logger.debug("newSelectGroupCount:,,Controller:{},,params:{}",this.getClass().getName(),params);
 		List<Map<String, Object>> result = commonService.newSelectGroupCount(params);
-		return R.ok().put("data", result);
+		return Response.ok().put("data", result);
 	}
 
 
@@ -310,7 +310,7 @@ public class CommonController{
 	 * @return
 	 */
 	@RequestMapping("/newSelectDateGroupSum")
-	public R newSelectDateGroupSum(@RequestParam Map<String,Object> params) {
+	public Response newSelectDateGroupSum(@RequestParam Map<String,Object> params) {
 		logger.debug("newSelectDateGroupSum:,,Controller:{},,params:{}",this.getClass().getName(),params);
 		String dateFormatType = String.valueOf(params.get("dateFormatType"));
 		if("1".equals(dateFormatType)){
@@ -320,10 +320,10 @@ public class CommonController{
 		}else if("3".equals(dateFormatType)){
 			params.put("dateFormat", "%Y-%m-%d");
 		}else{
-			R.error("日期格式化不正确");
+			Response.error("日期格式化不正确");
 		}
 		List<Map<String, Object>> result = commonService.newSelectDateGroupSum(params);
-		return R.ok().put("data", result);
+		return Response.ok().put("data", result);
 	}
 
 	/**
@@ -335,7 +335,7 @@ public class CommonController{
 	 * @return
 	 */
 	@RequestMapping("/newSelectDateGroupCount")
-	public R newSelectDateGroupCount(@RequestParam Map<String,Object> params) {
+	public Response newSelectDateGroupCount(@RequestParam Map<String,Object> params) {
 		logger.debug("newSelectDateGroupCount:,,Controller:{},,params:{}",this.getClass().getName(),params);
 		String dateFormatType = String.valueOf(params.get("dateFormatType"));
 		if("1".equals(dateFormatType)){
@@ -345,10 +345,10 @@ public class CommonController{
 		}else if("3".equals(dateFormatType)){
 			params.put("dateFormat", "%Y-%m-%d");
 		}else{
-			R.error("日期格式化类型不正确");
+			Response.error("日期格式化类型不正确");
 		}
 		List<Map<String, Object>> result = commonService.newSelectDateGroupCount(params);
-		return R.ok().put("data", result);
+		return Response.ok().put("data", result);
 	}
 /**
  * 饼状图
@@ -396,7 +396,7 @@ public class CommonController{
      * 柱状图求和
      */
     @RequestMapping("/barSum")
-    public R barSum(@RequestParam Map<String,Object> params) {
+    public Response barSum(@RequestParam Map<String,Object> params) {
         logger.debug("barSum方法:,,Controller:{},,params:{}",this.getClass().getName(), com.alibaba.fastjson.JSONObject.toJSONString(params));
         Boolean isJoinTableFlag =  false;//是否有级联表相关
         String one =  "";//第一优先
@@ -541,14 +541,14 @@ public class CommonController{
 		resultMap.put("xAxis",xAxis);
 		resultMap.put("yAxis",yAxis);
 		resultMap.put("legend",legend);
-		return R.ok().put("data", resultMap);
+		return Response.ok().put("data", resultMap);
     }
 	
 	/**
      * 柱状图统计
      */
     @RequestMapping("/barCount")
-    public R barCount(@RequestParam Map<String,Object> params) {
+    public Response barCount(@RequestParam Map<String,Object> params) {
         logger.debug("barCount方法:,,Controller:{},,params:{}",this.getClass().getName(), com.alibaba.fastjson.JSONObject.toJSONString(params));
         Boolean isJoinTableFlag =  false;//是否有级联表相关
         String one =  "";//第一优先
@@ -693,6 +693,6 @@ public class CommonController{
 		resultMap.put("xAxis",xAxis);
 		resultMap.put("yAxis",yAxis);
 		resultMap.put("legend",legend);
-		return R.ok().put("data", resultMap);
+		return Response.ok().put("data", resultMap);
     }
 }
