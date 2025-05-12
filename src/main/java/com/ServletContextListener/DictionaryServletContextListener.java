@@ -24,14 +24,14 @@ public class DictionaryServletContextListener implements ServletContextListener 
     private MyThreadMethod myThreadMethod;
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        logger.info("----------服务器停止----------");
+        logger.info("----------service stop----------");
     }
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         ApplicationContext appContext = WebApplicationContextUtils.getWebApplicationContext(sce.getServletContext());
 
-        logger.info("----------字典表初始化开始----------");
+        logger.info("----------Dictionary table initialization start----------");
         DictionaryService dictionaryService = (DictionaryService)appContext.getBean("dictionaryService");
         List<DictionaryEntity> dictionaryEntities = dictionaryService.selectList(new EntityWrapper<DictionaryEntity>());
         Map<String, Map<Integer,String>> map = new HashMap<>();
@@ -44,16 +44,16 @@ public class DictionaryServletContextListener implements ServletContextListener 
             map.put(d.getDicCode(),m);
         }
         sce.getServletContext().setAttribute("dictionaryMap", map);
-        logger.info("----------字典表初始化完成----------");
+        logger.info("----------Dictionary table initialization completed----------");
 
 
 
-        logger.info("----------线程执行开始----------");
+        logger.info("----------Thread execution starts----------");
         if (myThreadMethod == null) {
             myThreadMethod = new MyThreadMethod();
             myThreadMethod.start(); // servlet 上下文初始化时启动线程myThreadMethod
         }
-        logger.info("----------线程执行结束----------");
+        logger.info("----------Thread execution ends----------");
     }
 
 }

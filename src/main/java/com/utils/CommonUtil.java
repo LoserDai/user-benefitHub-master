@@ -3,7 +3,7 @@ package com.utils;
 import java.util.Random;
 
 public class CommonUtil {
-	/**
+    /**
      * 获取随机字符串
      *
      * @param num

@@ -18,12 +18,12 @@ import org.json.JSONObject;
 */
 
 public class BaiduUtil {
-	
+
     /**
      * 根据经纬度获得省市区信息
-     * @param lon 纬度
-     * @param lat 经度
-     * @param coordtype 经纬度坐标系
+     * @param key
+     * @param lng
+     * @param lat
      * @return
      */
     public static Map<String, String> getCityByLonLat(String key, String lng, String lat) {

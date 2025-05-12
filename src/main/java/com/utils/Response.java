@@ -14,7 +14,7 @@ public class Response extends HashMap<String, Object> {
 	}
 	
 	public static Response error() {
-		return error(500, "未知异常，请联系管理员");
+		return error(500, "system error !");
 	}
 	
 	public static Response error(String msg) {
